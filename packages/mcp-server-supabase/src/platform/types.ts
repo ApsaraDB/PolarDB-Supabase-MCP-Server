@@ -156,6 +156,7 @@ export type StorageConfig = z.infer<typeof storageConfigSchema>;
 export type StorageBucket = z.infer<typeof storageBucketSchema>;
 
 export type SupabasePlatform = {
+  readonly platformType: 'cloud' | 'polardb';
   init?(info: InitData): Promise<void>;
 
   // Database operations

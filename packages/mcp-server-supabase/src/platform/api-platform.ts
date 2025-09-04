@@ -67,6 +67,7 @@ export function createSupabaseApiPlatform(
   );
 
   const platform: SupabasePlatform = {
+    platformType: 'cloud' as const,
     async init(info: InitData) {
       const { clientInfo } = info;
       if (!clientInfo) {

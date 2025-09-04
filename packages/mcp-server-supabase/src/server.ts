@@ -1,4 +1,5 @@
 import { createMcpServer, type Tool } from '@supabase/mcp-utils';
+import type { Prompt } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import packageJson from '../package.json' with { type: 'json' };
 import { createContentApiClient } from './content-api/index.js';
@@ -11,6 +12,8 @@ import { getDevelopmentTools } from './tools/development-tools.js';
 import { getDocsTools } from './tools/docs-tools.js';
 import { getEdgeFunctionTools } from './tools/edge-function-tools.js';
 import { getStorageTools } from './tools/storage-tools.js';
+import { getPolarDBTools } from './tools/polardb-tools.js';
+import { promptsProvider } from './prompts-loader.js';
 
 const { version } = packageJson;
 
@@ -78,6 +81,7 @@ const DEFAULT_FEATURES: FeatureGroup[] = [
   'development',
   'functions',
   'branching',
+  'storage',
 ];
 
 /**
@@ -107,7 +111,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
       // Note: in stateless HTTP mode, `onInitialize` will not always be called
       // so we cannot rely on it for initialization. It's still useful for telemetry.
       const { clientInfo } = info;
-      const userAgent = `supabase-mcp/${version} (${clientInfo.name}/${clientInfo.version})`;
+      const userAgent = `polardb-supabase-mcp/${version} (${clientInfo.name}/${clientInfo.version})`;
 
       await Promise.all([
         platform.init?.(info),
@@ -116,44 +120,74 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
         ),
       ]);
     },
+    
+
+    prompts: async (): Promise<Prompt[]> => {
+      try {
+        const items = await promptsProvider.getAllPrompts();
+        const promptsAny = items.map((p) => ({
+          name: p.name,
+          description: p.description,
+          arguments: [],
+          messages: [
+            {
+              role: 'assistant',
+              content: { type: 'text', text: p.content },
+            },
+          ],
+        }));
+        return promptsAny as unknown as Prompt[];
+      } catch (error) {
+        return [];
+      }
+    },
+    
     tools: async () => {
       const contentApiClient = await contentApiClientPromise;
       const tools: Record<string, Tool> = {};
 
-      // Add feature-based tools
-      if (!projectId && enabledFeatures.has('account')) {
-        Object.assign(tools, getAccountTools({ platform }));
-      }
+      if (platform.platformType === 'polardb') {
+        const polardbTools = getPolarDBTools({ platform, projectId, readOnly });
+        
+        Object.entries(polardbTools).forEach(([name, tool]) => {
+          const mcpName = `polardb-supabase_${name}`;
+          tools[mcpName] = tool;
+        });
+      } else {   
+        if (!projectId && enabledFeatures.has('account')) {
+          Object.assign(tools, getAccountTools({ platform }));
+        }
 
-      if (enabledFeatures.has('branching')) {
-        Object.assign(tools, getBranchingTools({ platform, projectId }));
-      }
+        if (enabledFeatures.has('branching')) {
+          Object.assign(tools, getBranchingTools({ platform, projectId }));
+        }
 
-      if (enabledFeatures.has('database')) {
-        Object.assign(
-          tools,
-          getDatabaseOperationTools({ platform, projectId, readOnly })
-        );
-      }
+        if (enabledFeatures.has('database')) {
+          Object.assign(
+            tools,
+            getDatabaseOperationTools({ platform, projectId, readOnly })
+          );
+        }
 
-      if (enabledFeatures.has('debug')) {
-        Object.assign(tools, getDebuggingTools({ platform, projectId }));
-      }
+        if (enabledFeatures.has('debug')) {
+          Object.assign(tools, getDebuggingTools({ platform, projectId }));
+        }
 
-      if (enabledFeatures.has('development')) {
-        Object.assign(tools, getDevelopmentTools({ platform, projectId }));
-      }
+        if (enabledFeatures.has('development')) {
+          Object.assign(tools, getDevelopmentTools({ platform, projectId }));
+        }
 
-      if (enabledFeatures.has('docs')) {
-        Object.assign(tools, getDocsTools({ contentApiClient }));
-      }
+        if (enabledFeatures.has('docs')) {
+          Object.assign(tools, getDocsTools({ contentApiClient }));
+        }
 
-      if (enabledFeatures.has('functions')) {
-        Object.assign(tools, getEdgeFunctionTools({ platform, projectId }));
-      }
+        if (enabledFeatures.has('functions')) {
+          Object.assign(tools, getEdgeFunctionTools({ platform, projectId }));
+        }
 
-      if (enabledFeatures.has('storage')) {
-        Object.assign(tools, getStorageTools({ platform, projectId }));
+        if (enabledFeatures.has('storage')) {
+          Object.assign(tools, getStorageTools({ platform, projectId }));
+        }
       }
 
       return tools;

@@ -4,3 +4,11 @@ dist/
 .temp/
 .DS_Store
 .env*
+mcp-inspector-config.json
+packages/mcp-server-supabase/test-integrated.js
+.idea/.gitignore
+.idea/git_toolbox_blame.xml
+.idea/material_theme_project_new.xml
+.idea/modules.xml
+.idea/supabase-mcp.iml
+.idea/vcs.xml

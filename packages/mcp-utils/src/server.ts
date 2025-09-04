@@ -1,6 +1,8 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
   ListResourcesRequestSchema,
   ListResourceTemplatesRequestSchema,
   ListToolsRequestSchema,
@@ -13,6 +15,7 @@ import {
   type ServerCapabilities,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { z } from 'zod';
+import type { Prompt } from '@modelcontextprotocol/sdk/types.js';
 import zodToJsonSchema from 'zod-to-json-schema';
 import type {
   ExpandRecursively,
@@ -215,6 +218,17 @@ export type McpServerOptions = {
    * that can change after the server has started.
    */
   tools?: Prop<Record<string, Tool>>;
+
+  /**
+   * Prompts to be served by the server. These can be defined as a static object
+   * or as a function that dynamically returns the object synchronously or
+   * asynchronously.
+   *
+   * If defined as a function, the function will be called whenever the client
+   * asks for the list of prompts or gets a prompt. This allows for dynamic prompts
+   * that can change after the server has started.
+   */
+  prompts?: Prop<Prompt[]>;
 };
 
 /**
@@ -232,6 +246,10 @@ export function createMcpServer(options: McpServerOptions) {
 
   if (options.tools) {
     capabilities.tools = {};
+  }
+
+  if (options.prompts) {
+    capabilities.prompts = {};
   }
 
   const server = new Server(
@@ -262,6 +280,16 @@ export function createMcpServer(options: McpServerOptions) {
     return typeof options.tools === 'function'
       ? await options.tools()
       : options.tools;
+  }
+
+  async function getPrompts() {
+    if (!options.prompts) {
+      throw new Error('prompts not available');
+    }
+
+    return typeof options.prompts === 'function'
+      ? await options.prompts()
+      : options.prompts;
   }
 
   server.oninitialized = async () => {
@@ -436,6 +464,52 @@ export function createMcpServer(options: McpServerOptions) {
         return {
           content,
         };
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ error: enumerateError(error) }),
+            },
+          ],
+        };
+      }
+    });
+  }
+
+  if (options.prompts) {
+    server.setRequestHandler(ListPromptsRequestSchema, async () => {
+      const prompts = await getPrompts();
+      return {
+        prompts: prompts.map(({ name, description, messages }) => {
+          return {
+            name,
+            description,
+            arguments: [],
+            messages,
+          };
+        }),
+      };
+    });
+
+    server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+      try {
+        const prompts = await getPrompts();
+        const promptName = request.params.name;
+
+        const prompt = prompts.find((p) => p.name === promptName);
+
+        if (!prompt) {
+          throw new Error('prompt not found');
+        }
+
+        return {
+          name: prompt.name,
+          description: prompt.description,
+          arguments: [],
+          messages: Array.isArray((prompt as any).messages) ? (prompt as any).messages : [],
+        } as any;
       } catch (error) {
         return {
           isError: true,
