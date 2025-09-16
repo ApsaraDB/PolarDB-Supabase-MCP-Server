@@ -81,47 +81,15 @@ The following tools are available to the LLM:
 ### Development
 - `get_project_url`: Gets the API URL for a project
 - `get_anon_key`: Gets the anonymous API key for a project
-- `generate_typescript_types`: Generates TypeScript types based on the database schema
 
 ### Edge Functions
 - `list_edge_functions`: Lists all Edge Functions in a project
 - `get_edge_function`: Gets details for a specific Edge Function
 - `deploy_edge_function`: Deploys a new Edge Function to a project
 
-### Storage
-- `list_storage_buckets`: Lists all storage buckets in a project
-
 ### AI Prompts
-- `list_prompts`: List all available Supabase AI prompts and development guidance
-- `setup_ai_prompts`: Sets up AI prompts rules for Cursor and Qoder
+- `get_best_practices`: List all available Supabase AI prompts and development guidance
 
-The server provides comprehensive AI guidance through the `list_prompts` tool:
-
-#### list_prompts Tool
-- **功能**: 列出所有可用的 Supabase AI 提示词和开发指导
-- **参数**: 
-  - `category` (可选): 按分类过滤 (auth, database, edge-functions, frontend)
-  - `search` (可选): 按关键词搜索
-- **返回**: 分类统计、提示词列表、内容预览
-- **用途**: 为开发者提供专业的 Supabase 开发指导
-
-## Usage Examples
-
-### Using list_prompts Tool
-
-```javascript
-// 列出所有提示词
-await list_prompts({});
-
-// 按分类过滤
-await list_prompts({ category: 'auth' });
-
-// 按关键词搜索
-await list_prompts({ search: 'database' });
-
-// 组合使用
-await list_prompts({ category: 'database', search: 'schema' });
-```
 
 ## Resources
 
