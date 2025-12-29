@@ -140,27 +140,35 @@ export class PolarDBPlatform implements SupabasePlatform {
   async listAllBuckets(projectId: string): Promise<StorageBucket[]> { 
     // 通过 SQL 查询获取存储桶信息
     try {
-      const buckets = await this.executeSql(projectId, {
+      const buckets = await this.executeSql<{
+        id: string;
+        name: string;
+        owner: string | null;
+        created_at: string | null;
+        updated_at: string | null;
+        public: boolean;
+      }>(projectId, {
         query: `
           SELECT 
-            schemaname as name,
-            'public' as public,
-            'active' as status,
-            'storage' as type
-          FROM pg_catalog.pg_tables 
-          WHERE schemaname IN ('storage', 'public')
-          ORDER BY schemaname
+            id,
+            name,
+            owner::text as owner,
+            created_at::text as created_at,
+            updated_at::text as updated_at,
+            COALESCE(public, false) as public
+          FROM storage.buckets
+          ORDER BY created_at DESC NULLS LAST, name
         `,
         read_only: true
       });
       
-      return buckets.map((bucket: any) => ({
-        id: bucket.name,
+      return buckets.map((bucket) => ({
+        id: bucket.id,
         name: bucket.name,
-        public: bucket.public === 'public',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        owner: 'polardb'
+        owner: bucket.owner || '',
+        created_at: bucket.created_at || new Date().toISOString(),
+        updated_at: bucket.updated_at || new Date().toISOString(),
+        public: bucket.public
       }));
     } catch (error) {
       // 如果查询失败，返回空数组

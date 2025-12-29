@@ -4376,23 +4376,24 @@ var PolarDBPlatform = class {
       const buckets = await this.executeSql(projectId, {
         query: `
           SELECT 
-            schemaname as name,
-            'public' as public,
-            'active' as status,
-            'storage' as type
-          FROM pg_catalog.pg_tables 
-          WHERE schemaname IN ('storage', 'public')
-          ORDER BY schemaname
+            id,
+            name,
+            owner::text as owner,
+            created_at::text as created_at,
+            updated_at::text as updated_at,
+            COALESCE(public, false) as public
+          FROM storage.buckets
+          ORDER BY created_at DESC NULLS LAST, name
         `,
         read_only: true
       });
       return buckets.map((bucket) => ({
-        id: bucket.name,
+        id: bucket.id,
         name: bucket.name,
-        public: bucket.public === "public",
-        created_at: (/* @__PURE__ */ new Date()).toISOString(),
-        updated_at: (/* @__PURE__ */ new Date()).toISOString(),
-        owner: "polardb"
+        owner: bucket.owner || "",
+        created_at: bucket.created_at || (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: bucket.updated_at || (/* @__PURE__ */ new Date()).toISOString(),
+        public: bucket.public
       }));
     } catch (error) {
       return [];
