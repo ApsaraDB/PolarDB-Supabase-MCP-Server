@@ -1,0 +1,375 @@
+import { InitData } from '@supabase/mcp-utils';
+import { z } from 'zod';
+
+declare const storageBucketSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    owner: z.ZodString;
+    created_at: z.ZodString;
+    updated_at: z.ZodString;
+    public: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    public: boolean;
+    name: string;
+    id: string;
+    owner: string;
+    created_at: string;
+    updated_at: string;
+}, {
+    public: boolean;
+    name: string;
+    id: string;
+    owner: string;
+    created_at: string;
+    updated_at: string;
+}>;
+declare const storageConfigSchema: z.ZodObject<{
+    fileSizeLimit: z.ZodNumber;
+    features: z.ZodObject<{
+        imageTransformation: z.ZodObject<{
+            enabled: z.ZodBoolean;
+        }, "strip", z.ZodTypeAny, {
+            enabled: boolean;
+        }, {
+            enabled: boolean;
+        }>;
+        s3Protocol: z.ZodObject<{
+            enabled: z.ZodBoolean;
+        }, "strip", z.ZodTypeAny, {
+            enabled: boolean;
+        }, {
+            enabled: boolean;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        imageTransformation: {
+            enabled: boolean;
+        };
+        s3Protocol: {
+            enabled: boolean;
+        };
+    }, {
+        imageTransformation: {
+            enabled: boolean;
+        };
+        s3Protocol: {
+            enabled: boolean;
+        };
+    }>;
+}, "strip", z.ZodTypeAny, {
+    fileSizeLimit: number;
+    features: {
+        imageTransformation: {
+            enabled: boolean;
+        };
+        s3Protocol: {
+            enabled: boolean;
+        };
+    };
+}, {
+    fileSizeLimit: number;
+    features: {
+        imageTransformation: {
+            enabled: boolean;
+        };
+        s3Protocol: {
+            enabled: boolean;
+        };
+    };
+}>;
+declare const organizationSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    plan: z.ZodOptional<z.ZodString>;
+    allowed_release_channels: z.ZodArray<z.ZodString, "many">;
+    opt_in_tags: z.ZodArray<z.ZodString, "many">;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    id: string;
+    allowed_release_channels: string[];
+    opt_in_tags: string[];
+    plan?: string | undefined;
+}, {
+    name: string;
+    id: string;
+    allowed_release_channels: string[];
+    opt_in_tags: string[];
+    plan?: string | undefined;
+}>;
+declare const projectSchema: z.ZodObject<{
+    id: z.ZodString;
+    organization_id: z.ZodString;
+    name: z.ZodString;
+    status: z.ZodString;
+    created_at: z.ZodString;
+    region: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    status: string;
+    region: string;
+    id: string;
+    created_at: string;
+    organization_id: string;
+}, {
+    name: string;
+    status: string;
+    region: string;
+    id: string;
+    created_at: string;
+    organization_id: string;
+}>;
+declare const branchSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    project_ref: z.ZodString;
+    parent_project_ref: z.ZodString;
+    is_default: z.ZodBoolean;
+    git_branch: z.ZodOptional<z.ZodString>;
+    pr_number: z.ZodOptional<z.ZodNumber>;
+    latest_check_run_id: z.ZodOptional<z.ZodNumber>;
+    persistent: z.ZodBoolean;
+    status: z.ZodEnum<["CREATING_PROJECT", "RUNNING_MIGRATIONS", "MIGRATIONS_PASSED", "MIGRATIONS_FAILED", "FUNCTIONS_DEPLOYED", "FUNCTIONS_FAILED"]>;
+    created_at: z.ZodString;
+    updated_at: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    status: "CREATING_PROJECT" | "RUNNING_MIGRATIONS" | "MIGRATIONS_PASSED" | "MIGRATIONS_FAILED" | "FUNCTIONS_DEPLOYED" | "FUNCTIONS_FAILED";
+    id: string;
+    created_at: string;
+    updated_at: string;
+    project_ref: string;
+    parent_project_ref: string;
+    is_default: boolean;
+    persistent: boolean;
+    git_branch?: string | undefined;
+    pr_number?: number | undefined;
+    latest_check_run_id?: number | undefined;
+}, {
+    name: string;
+    status: "CREATING_PROJECT" | "RUNNING_MIGRATIONS" | "MIGRATIONS_PASSED" | "MIGRATIONS_FAILED" | "FUNCTIONS_DEPLOYED" | "FUNCTIONS_FAILED";
+    id: string;
+    created_at: string;
+    updated_at: string;
+    project_ref: string;
+    parent_project_ref: string;
+    is_default: boolean;
+    persistent: boolean;
+    git_branch?: string | undefined;
+    pr_number?: number | undefined;
+    latest_check_run_id?: number | undefined;
+}>;
+declare const edgeFunctionSchema: z.ZodObject<{
+    id: z.ZodString;
+    slug: z.ZodString;
+    name: z.ZodString;
+    status: z.ZodString;
+    version: z.ZodNumber;
+    created_at: z.ZodOptional<z.ZodNumber>;
+    updated_at: z.ZodOptional<z.ZodNumber>;
+    verify_jwt: z.ZodOptional<z.ZodBoolean>;
+    import_map: z.ZodOptional<z.ZodBoolean>;
+    import_map_path: z.ZodOptional<z.ZodString>;
+    entrypoint_path: z.ZodOptional<z.ZodString>;
+    files: z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        content: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        name: string;
+        content: string;
+    }, {
+        name: string;
+        content: string;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    status: string;
+    id: string;
+    slug: string;
+    version: number;
+    files: {
+        name: string;
+        content: string;
+    }[];
+    created_at?: number | undefined;
+    updated_at?: number | undefined;
+    verify_jwt?: boolean | undefined;
+    import_map?: boolean | undefined;
+    import_map_path?: string | undefined;
+    entrypoint_path?: string | undefined;
+}, {
+    name: string;
+    status: string;
+    id: string;
+    slug: string;
+    version: number;
+    files: {
+        name: string;
+        content: string;
+    }[];
+    created_at?: number | undefined;
+    updated_at?: number | undefined;
+    verify_jwt?: boolean | undefined;
+    import_map?: boolean | undefined;
+    import_map_path?: string | undefined;
+    entrypoint_path?: string | undefined;
+}>;
+declare const createProjectOptionsSchema: z.ZodObject<{
+    name: z.ZodString;
+    organization_id: z.ZodString;
+    region: z.ZodOptional<z.ZodEnum<["sa-east-1", "ap-south-1", "ca-central-1", "eu-central-2", "eu-central-1", "eu-north-1", "eu-west-3", "eu-west-2", "eu-west-1", "ap-southeast-2", "ap-northeast-2", "ap-northeast-1", "ap-southeast-1", "us-west-1", "us-east-2", "us-east-1"]>>;
+    db_pass: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    organization_id: string;
+    region?: "us-east-1" | "us-east-2" | "us-west-1" | "ap-southeast-1" | "ap-northeast-1" | "ap-northeast-2" | "ap-southeast-2" | "eu-west-1" | "eu-west-2" | "eu-west-3" | "eu-north-1" | "eu-central-1" | "eu-central-2" | "ca-central-1" | "ap-south-1" | "sa-east-1" | undefined;
+    db_pass?: string | undefined;
+}, {
+    name: string;
+    organization_id: string;
+    region?: "us-east-1" | "us-east-2" | "us-west-1" | "ap-southeast-1" | "ap-northeast-1" | "ap-northeast-2" | "ap-southeast-2" | "eu-west-1" | "eu-west-2" | "eu-west-3" | "eu-north-1" | "eu-central-1" | "eu-central-2" | "ca-central-1" | "ap-south-1" | "sa-east-1" | undefined;
+    db_pass?: string | undefined;
+}>;
+declare const createBranchOptionsSchema: z.ZodObject<{
+    name: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+}, {
+    name: string;
+}>;
+declare const resetBranchOptionsSchema: z.ZodObject<{
+    migration_version: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    migration_version?: string | undefined;
+}, {
+    migration_version?: string | undefined;
+}>;
+declare const deployEdgeFunctionOptionsSchema: z.ZodObject<{
+    name: z.ZodString;
+    entrypoint_path: z.ZodString;
+    import_map_path: z.ZodOptional<z.ZodString>;
+    files: z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        content: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        name: string;
+        content: string;
+    }, {
+        name: string;
+        content: string;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    entrypoint_path: string;
+    files: {
+        name: string;
+        content: string;
+    }[];
+    import_map_path?: string | undefined;
+}, {
+    name: string;
+    entrypoint_path: string;
+    files: {
+        name: string;
+        content: string;
+    }[];
+    import_map_path?: string | undefined;
+}>;
+declare const executeSqlOptionsSchema: z.ZodObject<{
+    query: z.ZodString;
+    read_only: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    query: string;
+    read_only?: boolean | undefined;
+}, {
+    query: string;
+    read_only?: boolean | undefined;
+}>;
+declare const applyMigrationOptionsSchema: z.ZodObject<{
+    name: z.ZodString;
+    query: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+    query: string;
+}, {
+    name: string;
+    query: string;
+}>;
+declare const migrationSchema: z.ZodObject<{
+    version: z.ZodString;
+    name: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    version: string;
+    name?: string | undefined;
+}, {
+    version: string;
+    name?: string | undefined;
+}>;
+declare const getLogsOptionsSchema: z.ZodObject<{
+    sql: z.ZodString;
+    iso_timestamp_start: z.ZodOptional<z.ZodString>;
+    iso_timestamp_end: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    sql: string;
+    iso_timestamp_start?: string | undefined;
+    iso_timestamp_end?: string | undefined;
+}, {
+    sql: string;
+    iso_timestamp_start?: string | undefined;
+    iso_timestamp_end?: string | undefined;
+}>;
+declare const generateTypescriptTypesResultSchema: z.ZodObject<{
+    types: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    types: string;
+}, {
+    types: string;
+}>;
+type Organization = z.infer<typeof organizationSchema>;
+type Project = z.infer<typeof projectSchema>;
+type Branch = z.infer<typeof branchSchema>;
+type EdgeFunction = z.infer<typeof edgeFunctionSchema>;
+type CreateProjectOptions = z.infer<typeof createProjectOptionsSchema>;
+type CreateBranchOptions = z.infer<typeof createBranchOptionsSchema>;
+type ResetBranchOptions = z.infer<typeof resetBranchOptionsSchema>;
+type DeployEdgeFunctionOptions = z.infer<typeof deployEdgeFunctionOptionsSchema>;
+type ExecuteSqlOptions = z.infer<typeof executeSqlOptionsSchema>;
+type ApplyMigrationOptions = z.infer<typeof applyMigrationOptionsSchema>;
+type Migration = z.infer<typeof migrationSchema>;
+type ListMigrationsResult = z.infer<typeof migrationSchema>;
+type GetLogsOptions = z.infer<typeof getLogsOptionsSchema>;
+type GenerateTypescriptTypesResult = z.infer<typeof generateTypescriptTypesResultSchema>;
+type StorageConfig = z.infer<typeof storageConfigSchema>;
+type StorageBucket = z.infer<typeof storageBucketSchema>;
+type SupabasePlatform = {
+    readonly platformType: 'cloud' | 'polardb';
+    init?(info: InitData): Promise<void>;
+    executeSql<T>(projectId: string, options: ExecuteSqlOptions): Promise<T[]>;
+    listMigrations(projectId: string): Promise<Migration[]>;
+    applyMigration(projectId: string, options: ApplyMigrationOptions): Promise<void>;
+    listOrganizations(): Promise<Pick<Organization, 'id' | 'name'>[]>;
+    getOrganization(organizationId: string): Promise<Organization>;
+    listProjects(): Promise<Project[]>;
+    getProject(projectId: string): Promise<Project>;
+    createProject(options: CreateProjectOptions): Promise<Project>;
+    pauseProject(projectId: string): Promise<void>;
+    restoreProject(projectId: string): Promise<void>;
+    listEdgeFunctions(projectId: string): Promise<EdgeFunction[]>;
+    getEdgeFunction(projectId: string, functionSlug: string): Promise<EdgeFunction>;
+    deployEdgeFunction(projectId: string, options: DeployEdgeFunctionOptions): Promise<Omit<EdgeFunction, 'files'>>;
+    getLogs(projectId: string, options: GetLogsOptions): Promise<unknown>;
+    getSecurityAdvisors(projectId: string): Promise<unknown>;
+    getPerformanceAdvisors(projectId: string): Promise<unknown>;
+    getProjectUrl(projectId: string): Promise<string>;
+    getAnonKey(projectId: string): Promise<string>;
+    generateTypescriptTypes(projectId: string): Promise<GenerateTypescriptTypesResult>;
+    listBranches(projectId: string): Promise<Branch[]>;
+    createBranch(projectId: string, options: CreateBranchOptions): Promise<Branch>;
+    deleteBranch(branchId: string): Promise<void>;
+    mergeBranch(branchId: string): Promise<void>;
+    resetBranch(branchId: string, options: ResetBranchOptions): Promise<void>;
+    rebaseBranch(branchId: string): Promise<void>;
+    getStorageConfig(projectId: string): Promise<StorageConfig>;
+    updateStorageConfig(projectId: string, config: StorageConfig): Promise<void>;
+    listAllBuckets(projectId: string): Promise<StorageBucket[]>;
+};
+
+export { type ApplyMigrationOptions as A, type Branch as B, type CreateProjectOptions as C, type DeployEdgeFunctionOptions as D, type ExecuteSqlOptions as E, type GenerateTypescriptTypesResult as G, type ListMigrationsResult as L, type Migration as M, type Organization as O, type Project as P, type ResetBranchOptions as R, type SupabasePlatform as S, type StorageBucket as a, type EdgeFunction as b, type CreateBranchOptions as c, type StorageConfig as d, storageConfigSchema as e, branchSchema as f, edgeFunctionSchema as g, createProjectOptionsSchema as h, createBranchOptionsSchema as i, deployEdgeFunctionOptionsSchema as j, executeSqlOptionsSchema as k, applyMigrationOptionsSchema as l, migrationSchema as m, getLogsOptionsSchema as n, organizationSchema as o, projectSchema as p, generateTypescriptTypesResultSchema as q, resetBranchOptionsSchema as r, storageBucketSchema as s, type GetLogsOptions as t };

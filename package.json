@@ -1,4 +1,10 @@
 {
+  "name": "polardb-supabase-mcp",
+  "private": false,
+  "version": "1.0.4",
+  "bin": {
+    "polardb-supabase-mcp": "./packages/mcp-server-supabase/dist/transports/stdio.js"
+  },
   "scripts": {
     "build": "pnpm --filter @supabase/mcp-utils --filter @supabase/mcp-server-supabase build",
     "test": "pnpm --parallel --filter @supabase/mcp-utils --filter @supabase/mcp-server-supabase test",

@@ -20,6 +20,17 @@ export default defineConfig([
       '.sql': 'text',
       '.md': 'text',
     },
+    // 将所有依赖项打包进 bundle，避免运行时依赖问题
+    // 包括所有 dependencies 中的包和 workspace 依赖
+    noExternal: [
+      '@modelcontextprotocol/sdk',
+      '@supabase/mcp-utils',
+      'zod',
+      'common-tags',
+      'graphql',
+      'openapi-fetch',
+      '@mjackson/multipart-parser',
+    ],
     // 复制提示词文件到 dist 目录
     onSuccess: 'cp -r src/prompts dist/',
   },
