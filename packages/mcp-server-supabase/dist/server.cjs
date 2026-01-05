@@ -19658,6 +19658,44 @@ ${edgeFunctionExample}`,
           files
         });
       }
+    }),
+    list_edge_function_secrets: injectableTool({
+      description: "Lists all Edge Function secrets in a Supabase project.",
+      parameters: external_exports.object({
+        project_id: external_exports.string()
+      }),
+      inject: { project_id },
+      execute: async ({ project_id: project_id2 }) => {
+        return await platform.listSecrets(project_id2);
+      }
+    }),
+    create_edge_function_secrets: injectableTool({
+      description: "Creates or updates Edge Function secrets in a Supabase project. Secrets are encrypted and stored securely.",
+      parameters: external_exports.object({
+        project_id: external_exports.string(),
+        secrets: external_exports.array(
+          external_exports.object({
+            name: external_exports.string().describe("The name of the secret"),
+            value: external_exports.string().describe("The value of the secret (will be encrypted)")
+          })
+        ).describe("Array of secrets to create or update")
+      }),
+      inject: { project_id },
+      execute: async ({ project_id: project_id2, secrets }) => {
+        return await platform.createSecrets(project_id2, secrets);
+      }
+    }),
+    delete_edge_function_secrets: injectableTool({
+      description: "Deletes Edge Function secrets from a Supabase project.",
+      parameters: external_exports.object({
+        project_id: external_exports.string(),
+        secret_names: external_exports.array(external_exports.string()).describe("Array of secret names to delete")
+      }),
+      inject: { project_id },
+      execute: async ({ project_id: project_id2, secret_names }) => {
+        await platform.deleteSecrets(project_id2, secret_names);
+        return { success: true, message: "Secrets deleted successfully" };
+      }
     })
   };
 }
@@ -19905,6 +19943,41 @@ function getPolarDBTools({ platform, projectId, readOnly }) {
           import_map_path,
           files
         });
+      }
+    }),
+    list_edge_function_secrets: Hv({
+      description: "List all Edge Function secrets in the project",
+      parameters: external_exports.object({}),
+      async execute() {
+        return await platform.listSecrets(projectId || "default");
+      }
+    }),
+    create_edge_function_secrets: Hv({
+      description: "Create or update Edge Function secrets. Secrets are encrypted and stored securely.",
+      parameters: external_exports.object({
+        secrets: external_exports.array(external_exports.object({
+          name: external_exports.string().describe("The name of the secret"),
+          value: external_exports.string().describe("The value of the secret (will be encrypted)")
+        })).describe("Array of secrets to create or update")
+      }),
+      async execute({ secrets }) {
+        if (readOnly) {
+          throw new Error("Cannot create secrets in read-only mode");
+        }
+        return await platform.createSecrets(projectId || "default", secrets);
+      }
+    }),
+    delete_edge_function_secrets: Hv({
+      description: "Delete Edge Function secrets from the project",
+      parameters: external_exports.object({
+        secret_names: external_exports.array(external_exports.string()).describe("Array of secret names to delete")
+      }),
+      async execute({ secret_names }) {
+        if (readOnly) {
+          throw new Error("Cannot delete secrets in read-only mode");
+        }
+        await platform.deleteSecrets(projectId || "default", secret_names);
+        return { success: true, message: "Secrets deleted successfully" };
       }
     }),
     get_best_practices: Hv({

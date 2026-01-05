@@ -129,6 +129,46 @@ export function getPolarDBTools({ platform, projectId, readOnly }: PolarDBToolsO
       }
     }),
 
+    list_edge_function_secrets: tool({
+      description: "List all Edge Function secrets in the project",
+      parameters: z.object({}),
+      async execute() {
+        return await platform.listSecrets(projectId || 'default');
+      }
+    }),
+
+    create_edge_function_secrets: tool({
+      description: "Create or update Edge Function secrets. Secrets are encrypted and stored securely.",
+      parameters: z.object({
+        secrets: z.array(z.object({
+          name: z.string().describe("The name of the secret"),
+          value: z.string().describe("The value of the secret (will be encrypted)")
+        })).describe("Array of secrets to create or update")
+      }),
+      async execute({ secrets }) {
+        if (readOnly) {
+          throw new Error('Cannot create secrets in read-only mode');
+        }
+        
+        return await platform.createSecrets(projectId || 'default', secrets);
+      }
+    }),
+
+    delete_edge_function_secrets: tool({
+      description: "Delete Edge Function secrets from the project",
+      parameters: z.object({
+        secret_names: z.array(z.string()).describe("Array of secret names to delete")
+      }),
+      async execute({ secret_names }) {
+        if (readOnly) {
+          throw new Error('Cannot delete secrets in read-only mode');
+        }
+        
+        await platform.deleteSecrets(projectId || 'default', secret_names);
+        return { success: true, message: 'Secrets deleted successfully' };
+      }
+    }),
+
     get_best_practices: tool({
       description: "Get Supabase development best practices and prompts for use in IDE rules configuration",
       parameters: z.object({}),

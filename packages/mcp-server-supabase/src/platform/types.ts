@@ -130,6 +130,19 @@ export const generateTypescriptTypesResultSchema = z.object({
   types: z.string(),
 });
 
+export const secretSchema = z.object({
+  name: z.string(),
+  value: z.string(),
+  updated_at: z.string().nullable(),
+});
+
+export const createSecretOptionsSchema = z.object({
+  name: z.string(),
+  value: z.string(),
+});
+
+export const createSecretsOptionsSchema = z.array(createSecretOptionsSchema);
+
 export type Organization = z.infer<typeof organizationSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Branch = z.infer<typeof branchSchema>;
@@ -154,6 +167,9 @@ export type GenerateTypescriptTypesResult = z.infer<
 
 export type StorageConfig = z.infer<typeof storageConfigSchema>;
 export type StorageBucket = z.infer<typeof storageBucketSchema>;
+export type Secret = z.infer<typeof secretSchema>;
+export type CreateSecretOptions = z.infer<typeof createSecretOptionsSchema>;
+export type CreateSecretsOptions = z.infer<typeof createSecretsOptionsSchema>;
 
 export type SupabasePlatform = {
   readonly platformType: 'cloud' | 'polardb';
@@ -186,6 +202,14 @@ export type SupabasePlatform = {
     projectId: string,
     options: DeployEdgeFunctionOptions
   ): Promise<Omit<EdgeFunction, 'files'>>;
+  
+  // Edge function secrets
+  listSecrets(projectId: string): Promise<Secret[]>;
+  createSecrets(
+    projectId: string,
+    secrets: CreateSecretsOptions
+  ): Promise<Secret[]>;
+  deleteSecrets(projectId: string, secretNames: string[]): Promise<void>;
 
   // Debugging
   getLogs(projectId: string, options: GetLogsOptions): Promise<unknown>;

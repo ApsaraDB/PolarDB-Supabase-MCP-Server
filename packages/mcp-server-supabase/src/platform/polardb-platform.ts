@@ -13,7 +13,9 @@ import type {
   ResetBranchOptions,
   StorageConfig,
   StorageBucket,
-  GenerateTypescriptTypesResult
+  GenerateTypescriptTypesResult,
+  Secret,
+  CreateSecretsOptions
 } from './types.js';
 
 export interface PolarDBPlatformOptions {
@@ -323,6 +325,105 @@ export class PolarDBPlatform implements SupabasePlatform {
       };
     } catch (error) {
       throw new Error(`Failed to deploy Edge Function: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // Edge function secrets
+  async listSecrets(projectId: string): Promise<Secret[]> {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error('Edge Functions secrets 相关功能需要先设置用户名和密码');
+    }
+    
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
+      
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${basicAuth}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to list secrets: ${response.status} ${errorText}`);
+      }
+      
+      const secrets = await response.json();
+      
+      // 确保返回格式符合 Secret 类型
+      return secrets.map((secret: any) => ({
+        name: secret.name,
+        value: secret.value,
+        updated_at: secret.updated_at || null
+      }));
+    } catch (error) {
+      throw new Error(`Failed to list secrets: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  async createSecrets(projectId: string, secrets: CreateSecretsOptions): Promise<Secret[]> {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error('Edge Functions secrets 相关功能需要先设置用户名和密码');
+    }
+    
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
+      
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${basicAuth}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(secrets)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create secrets: ${response.status} ${errorText}`);
+      }
+      
+      const result = await response.json();
+      
+      // 确保返回格式符合 Secret 类型
+      return result.map((secret: any) => ({
+        name: secret.name,
+        value: secret.value,
+        updated_at: secret.updated_at || null
+      }));
+    } catch (error) {
+      throw new Error(`Failed to create secrets: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  async deleteSecrets(projectId: string, secretNames: string[]): Promise<void> {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error('Edge Functions secrets 相关功能需要先设置用户名和密码');
+    }
+    
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
+      
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Basic ${basicAuth}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(secretNames)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete secrets: ${response.status} ${errorText}`);
+      }
+      
+      // DELETE 请求可能返回空响应或成功消息
+      await response.text();
+    } catch (error) {
+      throw new Error(`Failed to delete secrets: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

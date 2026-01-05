@@ -28,11 +28,13 @@ import {
   type ApplyMigrationOptions,
   type CreateBranchOptions,
   type CreateProjectOptions,
+  type CreateSecretsOptions,
   type DeployEdgeFunctionOptions,
   type EdgeFunction,
   type ExecuteSqlOptions,
   type GetLogsOptions,
   type ResetBranchOptions,
+  type Secret,
   type StorageConfig,
   type SupabasePlatform,
 } from './index.js';
@@ -422,6 +424,24 @@ export function createSupabaseApiPlatform(
       assertSuccess(response, 'Failed to deploy Edge Function');
 
       return response.data;
+    },
+    async listSecrets(projectId: string): Promise<Secret[]> {
+      // Note: Supabase Management API may not have a direct secrets endpoint
+      // This is a placeholder implementation that throws an error
+      // If the API supports it, this should be updated to use managementApiClient
+      throw new Error('Secrets management is not yet supported in Supabase Cloud platform. Please use PolarDB platform for secrets management.');
+    },
+    async createSecrets(projectId: string, secrets: CreateSecretsOptions): Promise<Secret[]> {
+      // Note: Supabase Management API may not have a direct secrets endpoint
+      // This is a placeholder implementation that throws an error
+      // If the API supports it, this should be updated to use managementApiClient
+      throw new Error('Secrets management is not yet supported in Supabase Cloud platform. Please use PolarDB platform for secrets management.');
+    },
+    async deleteSecrets(projectId: string, secretNames: string[]): Promise<void> {
+      // Note: Supabase Management API may not have a direct secrets endpoint
+      // This is a placeholder implementation that throws an error
+      // If the API supports it, this should be updated to use managementApiClient
+      throw new Error('Secrets management is not yet supported in Supabase Cloud platform. Please use PolarDB platform for secrets management.');
     },
     async getLogs(projectId: string, options: GetLogsOptions) {
       const { sql, iso_timestamp_start, iso_timestamp_end } =

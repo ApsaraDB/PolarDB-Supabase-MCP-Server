@@ -65,5 +65,43 @@ export function getEdgeFunctionTools({
         });
       },
     }),
+    list_edge_function_secrets: injectableTool({
+      description: 'Lists all Edge Function secrets in a Supabase project.',
+      parameters: z.object({
+        project_id: z.string(),
+      }),
+      inject: { project_id },
+      execute: async ({ project_id }) => {
+        return await platform.listSecrets(project_id);
+      },
+    }),
+    create_edge_function_secrets: injectableTool({
+      description: 'Creates or updates Edge Function secrets in a Supabase project. Secrets are encrypted and stored securely.',
+      parameters: z.object({
+        project_id: z.string(),
+        secrets: z.array(
+          z.object({
+            name: z.string().describe('The name of the secret'),
+            value: z.string().describe('The value of the secret (will be encrypted)'),
+          })
+        ).describe('Array of secrets to create or update'),
+      }),
+      inject: { project_id },
+      execute: async ({ project_id, secrets }) => {
+        return await platform.createSecrets(project_id, secrets);
+      },
+    }),
+    delete_edge_function_secrets: injectableTool({
+      description: 'Deletes Edge Function secrets from a Supabase project.',
+      parameters: z.object({
+        project_id: z.string(),
+        secret_names: z.array(z.string()).describe('Array of secret names to delete'),
+      }),
+      inject: { project_id },
+      execute: async ({ project_id, secret_names }) => {
+        await platform.deleteSecrets(project_id, secret_names);
+        return { success: true, message: 'Secrets deleted successfully' };
+      },
+    }),
   };
 }

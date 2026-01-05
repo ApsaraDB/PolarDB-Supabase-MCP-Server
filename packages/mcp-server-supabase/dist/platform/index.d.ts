@@ -1,5 +1,5 @@
-import { S as SupabasePlatform, E as ExecuteSqlOptions, G as GenerateTypescriptTypesResult, a as StorageBucket, b as EdgeFunction, D as DeployEdgeFunctionOptions, M as Migration, A as ApplyMigrationOptions, O as Organization, P as Project, C as CreateProjectOptions, c as CreateBranchOptions, R as ResetBranchOptions, d as StorageConfig } from '../types-CdbwumKR.js';
-export { B as Branch, t as GetLogsOptions, L as ListMigrationsResult, l as applyMigrationOptionsSchema, f as branchSchema, i as createBranchOptionsSchema, h as createProjectOptionsSchema, j as deployEdgeFunctionOptionsSchema, g as edgeFunctionSchema, k as executeSqlOptionsSchema, q as generateTypescriptTypesResultSchema, n as getLogsOptionsSchema, m as migrationSchema, o as organizationSchema, p as projectSchema, r as resetBranchOptionsSchema, s as storageBucketSchema, e as storageConfigSchema } from '../types-CdbwumKR.js';
+import { S as SupabasePlatform, E as ExecuteSqlOptions, G as GenerateTypescriptTypesResult, a as StorageBucket, b as EdgeFunction, D as DeployEdgeFunctionOptions, c as Secret, C as CreateSecretsOptions, M as Migration, A as ApplyMigrationOptions, O as Organization, P as Project, d as CreateProjectOptions, e as CreateBranchOptions, R as ResetBranchOptions, f as StorageConfig } from '../types-BGR5CTgA.js';
+export { B as Branch, z as CreateSecretOptions, y as GetLogsOptions, L as ListMigrationsResult, n as applyMigrationOptionsSchema, h as branchSchema, k as createBranchOptionsSchema, j as createProjectOptionsSchema, w as createSecretOptionsSchema, x as createSecretsOptionsSchema, l as deployEdgeFunctionOptionsSchema, i as edgeFunctionSchema, m as executeSqlOptionsSchema, u as generateTypescriptTypesResultSchema, t as getLogsOptionsSchema, q as migrationSchema, o as organizationSchema, p as projectSchema, r as resetBranchOptionsSchema, v as secretSchema, s as storageBucketSchema, g as storageConfigSchema } from '../types-BGR5CTgA.js';
 import { InitData } from '@supabase/mcp-utils';
 import 'zod';
 
@@ -27,6 +27,9 @@ declare class PolarDBPlatform implements SupabasePlatform {
     listEdgeFunctions(projectId: string): Promise<EdgeFunction[]>;
     getEdgeFunction(projectId: string, functionSlug: string): Promise<EdgeFunction>;
     deployEdgeFunction(projectId: string, options: DeployEdgeFunctionOptions): Promise<Omit<EdgeFunction, 'files'>>;
+    listSecrets(projectId: string): Promise<Secret[]>;
+    createSecrets(projectId: string, secrets: CreateSecretsOptions): Promise<Secret[]>;
+    deleteSecrets(projectId: string, secretNames: string[]): Promise<void>;
     listMigrations(projectId: string): Promise<Migration[]>;
     applyMigration(projectId: string, options: ApplyMigrationOptions): Promise<void>;
     listOrganizations(): Promise<Pick<Organization, 'id' | 'name'>[]>;
@@ -49,4 +52,4 @@ declare class PolarDBPlatform implements SupabasePlatform {
     getPerformanceAdvisors(projectId: string): Promise<unknown>;
 }
 
-export { ApplyMigrationOptions, CreateBranchOptions, CreateProjectOptions, DeployEdgeFunctionOptions, EdgeFunction, ExecuteSqlOptions, GenerateTypescriptTypesResult, Migration, Organization, PolarDBPlatform, type PolarDBPlatformOptions, Project, ResetBranchOptions, StorageBucket, StorageConfig, SupabasePlatform };
+export { ApplyMigrationOptions, CreateBranchOptions, CreateProjectOptions, CreateSecretsOptions, DeployEdgeFunctionOptions, EdgeFunction, ExecuteSqlOptions, GenerateTypescriptTypesResult, Migration, Organization, PolarDBPlatform, type PolarDBPlatformOptions, Project, ResetBranchOptions, Secret, StorageBucket, StorageConfig, SupabasePlatform };

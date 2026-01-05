@@ -1,6 +1,6 @@
 import * as _modelcontextprotocol_sdk_server from '@modelcontextprotocol/sdk/server';
 import { z } from 'zod';
-import { S as SupabasePlatform } from './types-CdbwumKR.cjs';
+import { S as SupabasePlatform } from './types-BGR5CTgA.cjs';
 import '@supabase/mcp-utils';
 
 type SupabasePlatformOptions = {

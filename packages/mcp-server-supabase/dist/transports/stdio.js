@@ -8465,6 +8465,16 @@ var getLogsOptionsSchema = external_exports.object({
 var generateTypescriptTypesResultSchema = external_exports.object({
   types: external_exports.string()
 });
+var secretSchema = external_exports.object({
+  name: external_exports.string(),
+  value: external_exports.string(),
+  updated_at: external_exports.string().nullable()
+});
+var createSecretOptionsSchema = external_exports.object({
+  name: external_exports.string(),
+  value: external_exports.string()
+});
+var createSecretsOptionsSchema = external_exports.array(createSecretOptionsSchema);
 
 // src/platform/polardb-platform.ts
 var PolarDBPlatform = class {
@@ -8701,6 +8711,85 @@ var PolarDBPlatform = class {
       };
     } catch (error) {
       throw new Error(`Failed to deploy Edge Function: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  // Edge function secrets
+  async listSecrets(projectId) {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
+    }
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Basic ${basicAuth}`,
+          "Content-Type": "application/json"
+        }
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to list secrets: ${response.status} ${errorText}`);
+      }
+      const secrets = await response.json();
+      return secrets.map((secret) => ({
+        name: secret.name,
+        value: secret.value,
+        updated_at: secret.updated_at || null
+      }));
+    } catch (error) {
+      throw new Error(`Failed to list secrets: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  async createSecrets(projectId, secrets) {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
+    }
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${basicAuth}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(secrets)
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create secrets: ${response.status} ${errorText}`);
+      }
+      const result = await response.json();
+      return result.map((secret) => ({
+        name: secret.name,
+        value: secret.value,
+        updated_at: secret.updated_at || null
+      }));
+    } catch (error) {
+      throw new Error(`Failed to create secrets: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  async deleteSecrets(projectId, secretNames) {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
+    }
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Basic ${basicAuth}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(secretNames)
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete secrets: ${response.status} ${errorText}`);
+      }
+      await response.text();
+    } catch (error) {
+      throw new Error(`Failed to delete secrets: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   // ========================================
@@ -9076,6 +9165,15 @@ function createSupabaseApiPlatform(options) {
       );
       assertSuccess(response, "Failed to deploy Edge Function");
       return response.data;
+    },
+    async listSecrets(projectId) {
+      throw new Error("Secrets management is not yet supported in Supabase Cloud platform. Please use PolarDB platform for secrets management.");
+    },
+    async createSecrets(projectId, secrets) {
+      throw new Error("Secrets management is not yet supported in Supabase Cloud platform. Please use PolarDB platform for secrets management.");
+    },
+    async deleteSecrets(projectId, secretNames) {
+      throw new Error("Secrets management is not yet supported in Supabase Cloud platform. Please use PolarDB platform for secrets management.");
     },
     async getLogs(projectId, options2) {
       const { sql, iso_timestamp_start, iso_timestamp_end } = getLogsOptionsSchema.parse(options2);
@@ -24395,6 +24493,44 @@ ${edgeFunctionExample}`,
           files
         });
       }
+    }),
+    list_edge_function_secrets: injectableTool({
+      description: "Lists all Edge Function secrets in a Supabase project.",
+      parameters: external_exports.object({
+        project_id: external_exports.string()
+      }),
+      inject: { project_id },
+      execute: async ({ project_id: project_id2 }) => {
+        return await platform.listSecrets(project_id2);
+      }
+    }),
+    create_edge_function_secrets: injectableTool({
+      description: "Creates or updates Edge Function secrets in a Supabase project. Secrets are encrypted and stored securely.",
+      parameters: external_exports.object({
+        project_id: external_exports.string(),
+        secrets: external_exports.array(
+          external_exports.object({
+            name: external_exports.string().describe("The name of the secret"),
+            value: external_exports.string().describe("The value of the secret (will be encrypted)")
+          })
+        ).describe("Array of secrets to create or update")
+      }),
+      inject: { project_id },
+      execute: async ({ project_id: project_id2, secrets }) => {
+        return await platform.createSecrets(project_id2, secrets);
+      }
+    }),
+    delete_edge_function_secrets: injectableTool({
+      description: "Deletes Edge Function secrets from a Supabase project.",
+      parameters: external_exports.object({
+        project_id: external_exports.string(),
+        secret_names: external_exports.array(external_exports.string()).describe("Array of secret names to delete")
+      }),
+      inject: { project_id },
+      execute: async ({ project_id: project_id2, secret_names }) => {
+        await platform.deleteSecrets(project_id2, secret_names);
+        return { success: true, message: "Secrets deleted successfully" };
+      }
     })
   };
 }
@@ -24642,6 +24778,41 @@ function getPolarDBTools({ platform, projectId, readOnly }) {
           import_map_path,
           files
         });
+      }
+    }),
+    list_edge_function_secrets: Hv({
+      description: "List all Edge Function secrets in the project",
+      parameters: external_exports.object({}),
+      async execute() {
+        return await platform.listSecrets(projectId || "default");
+      }
+    }),
+    create_edge_function_secrets: Hv({
+      description: "Create or update Edge Function secrets. Secrets are encrypted and stored securely.",
+      parameters: external_exports.object({
+        secrets: external_exports.array(external_exports.object({
+          name: external_exports.string().describe("The name of the secret"),
+          value: external_exports.string().describe("The value of the secret (will be encrypted)")
+        })).describe("Array of secrets to create or update")
+      }),
+      async execute({ secrets }) {
+        if (readOnly) {
+          throw new Error("Cannot create secrets in read-only mode");
+        }
+        return await platform.createSecrets(projectId || "default", secrets);
+      }
+    }),
+    delete_edge_function_secrets: Hv({
+      description: "Delete Edge Function secrets from the project",
+      parameters: external_exports.object({
+        secret_names: external_exports.array(external_exports.string()).describe("Array of secret names to delete")
+      }),
+      async execute({ secret_names }) {
+        if (readOnly) {
+          throw new Error("Cannot delete secrets in read-only mode");
+        }
+        await platform.deleteSecrets(projectId || "default", secret_names);
+        return { success: true, message: "Secrets deleted successfully" };
       }
     }),
     get_best_practices: Hv({

@@ -25,6 +25,8 @@ __export(platform_exports, {
   branchSchema: () => branchSchema,
   createBranchOptionsSchema: () => createBranchOptionsSchema,
   createProjectOptionsSchema: () => createProjectOptionsSchema,
+  createSecretOptionsSchema: () => createSecretOptionsSchema,
+  createSecretsOptionsSchema: () => createSecretsOptionsSchema,
   deployEdgeFunctionOptionsSchema: () => deployEdgeFunctionOptionsSchema,
   edgeFunctionSchema: () => edgeFunctionSchema,
   executeSqlOptionsSchema: () => executeSqlOptionsSchema,
@@ -34,6 +36,7 @@ __export(platform_exports, {
   organizationSchema: () => organizationSchema,
   projectSchema: () => projectSchema,
   resetBranchOptionsSchema: () => resetBranchOptionsSchema,
+  secretSchema: () => secretSchema,
   storageBucketSchema: () => storageBucketSchema,
   storageConfigSchema: () => storageConfigSchema
 });
@@ -4281,6 +4284,16 @@ var getLogsOptionsSchema = external_exports.object({
 var generateTypescriptTypesResultSchema = external_exports.object({
   types: external_exports.string()
 });
+var secretSchema = external_exports.object({
+  name: external_exports.string(),
+  value: external_exports.string(),
+  updated_at: external_exports.string().nullable()
+});
+var createSecretOptionsSchema = external_exports.object({
+  name: external_exports.string(),
+  value: external_exports.string()
+});
+var createSecretsOptionsSchema = external_exports.array(createSecretOptionsSchema);
 
 // src/platform/polardb-platform.ts
 var PolarDBPlatform = class {
@@ -4519,6 +4532,85 @@ var PolarDBPlatform = class {
       throw new Error(`Failed to deploy Edge Function: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
+  // Edge function secrets
+  async listSecrets(projectId) {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
+    }
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Basic ${basicAuth}`,
+          "Content-Type": "application/json"
+        }
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to list secrets: ${response.status} ${errorText}`);
+      }
+      const secrets = await response.json();
+      return secrets.map((secret) => ({
+        name: secret.name,
+        value: secret.value,
+        updated_at: secret.updated_at || null
+      }));
+    } catch (error) {
+      throw new Error(`Failed to list secrets: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  async createSecrets(projectId, secrets) {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
+    }
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${basicAuth}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(secrets)
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create secrets: ${response.status} ${errorText}`);
+      }
+      const result = await response.json();
+      return result.map((secret) => ({
+        name: secret.name,
+        value: secret.value,
+        updated_at: secret.updated_at || null
+      }));
+    } catch (error) {
+      throw new Error(`Failed to create secrets: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  async deleteSecrets(projectId, secretNames) {
+    if (!this.dashboardUsername || !this.dashboardPassword) {
+      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
+    }
+    try {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
+      const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Basic ${basicAuth}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(secretNames)
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete secrets: ${response.status} ${errorText}`);
+      }
+      await response.text();
+    } catch (error) {
+      throw new Error(`Failed to delete secrets: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
   // ========================================
   // 不支持的功能（PolarDB 模式不支持）
   // ========================================
@@ -4596,6 +4688,8 @@ var PolarDBPlatform = class {
   branchSchema,
   createBranchOptionsSchema,
   createProjectOptionsSchema,
+  createSecretOptionsSchema,
+  createSecretsOptionsSchema,
   deployEdgeFunctionOptionsSchema,
   edgeFunctionSchema,
   executeSqlOptionsSchema,
@@ -4605,6 +4699,7 @@ var PolarDBPlatform = class {
   organizationSchema,
   projectSchema,
   resetBranchOptionsSchema,
+  secretSchema,
   storageBucketSchema,
   storageConfigSchema
 });

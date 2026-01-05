@@ -1,6 +1,6 @@
 import { Tool } from '@supabase/mcp-utils';
 import { z } from 'zod';
-import { S as SupabasePlatform } from '../types-CdbwumKR.cjs';
+import { S as SupabasePlatform } from '../types-BGR5CTgA.cjs';
 
 interface PolarDBToolsOptions {
     platform: SupabasePlatform;
@@ -126,6 +126,47 @@ declare function getPolarDBTools({ platform, projectId, readOnly }: PolarDBTools
         import_map_path?: string | undefined;
         entrypoint_path?: string | undefined;
     }, "files">>;
+    list_edge_function_secrets: Tool<z.ZodObject<{}, "strip", z.ZodTypeAny, {}, {}>, {
+        name: string;
+        value: string;
+        updated_at: string | null;
+    }[]>;
+    create_edge_function_secrets: Tool<z.ZodObject<{
+        secrets: z.ZodArray<z.ZodObject<{
+            name: z.ZodString;
+            value: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            name: string;
+            value: string;
+        }, {
+            name: string;
+            value: string;
+        }>, "many">;
+    }, "strip", z.ZodTypeAny, {
+        secrets: {
+            name: string;
+            value: string;
+        }[];
+    }, {
+        secrets: {
+            name: string;
+            value: string;
+        }[];
+    }>, {
+        name: string;
+        value: string;
+        updated_at: string | null;
+    }[]>;
+    delete_edge_function_secrets: Tool<z.ZodObject<{
+        secret_names: z.ZodArray<z.ZodString, "many">;
+    }, "strip", z.ZodTypeAny, {
+        secret_names: string[];
+    }, {
+        secret_names: string[];
+    }>, {
+        success: boolean;
+        message: string;
+    }>;
     get_best_practices: Tool<z.ZodObject<{}, "strip", z.ZodTypeAny, {}, {}>, {
         content: string;
         count: number;

@@ -25,6 +25,11 @@ PolarDB Supabase MCP，提供完整的数据库管理、Edge Functions 和存储
 - `get_edge_function` - 获取特定 Edge Function 详情
 - `deploy_edge_function` - 部署 Edge Function
 
+#### Edge Functions Secrets 管理（需要 Dashboard 认证）
+- `list_edge_function_secrets` - 列出所有 Edge Function secrets（加密值）
+- `create_edge_function_secrets` - 创建或更新 Edge Function secrets（支持批量操作，值会被加密存储）
+- `delete_edge_function_secrets` - 删除 Edge Function secrets（支持批量删除）
+
 ### 🎯 Supabase 官方 AI Prompts 集成
 
 本 MCP 服务器还集成了 Supabase 官方的 AI 提示词，通过 MCP 资源协议自动提供：
@@ -102,8 +107,8 @@ pnpm build
 | `--api-url` | `SUPABASE_API_URL` | Supabase 项目 API URL | ✅ |
 | `--service-role-key` | `SUPABASE_SERVICE_ROLE_KEY` | Supabase 服务角色密钥 | ✅ |
 | `--anon-key` | `SUPABASE_ANON_KEY` | Supabase 匿名密钥 | ❌ |
-| `--dashboard-username` | `SUPABASE_DASHBOARD_USERNAME` | Supabase Dashboard 用户名（用于 Edge Functions） | ❌ |
-| `--dashboard-password` | `SUPABASE_DASHBOARD_PASSWORD` | Supabase Dashboard 密码（用于 Edge Functions） | ❌ |
+| `--dashboard-username` | `SUPABASE_DASHBOARD_USERNAME` | Supabase Dashboard 用户名（用于 Edge Functions 和 Secrets 管理） | ❌ |
+| `--dashboard-password` | `SUPABASE_DASHBOARD_PASSWORD` | Supabase Dashboard 密码（用于 Edge Functions 和 Secrets 管理） | ❌ |
 | `--read-only` | - | 只读模式，防止写操作 | ❌ |
 
 
