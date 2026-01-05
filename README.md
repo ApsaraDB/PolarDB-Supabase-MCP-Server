@@ -22,11 +22,41 @@ You'll need the following from your PolarDB instance:
 
 - **API URL**: Your PolarDB instance endpoint (e.g., `http://your-host:port`)
 - **Service Role Key**: For database operations
-- **Dashboard Username/Password**: For Edge Functions and type generation
+- **Dashboard Username/Password**: For Edge Functions, secrets management, and type generation
 
 ### 2. Configure your MCP client
 
-Configure your MCP client (such as Cursor) to use this server. Most MCP clients store the configuration as JSON:
+Configure your MCP client (such as Cursor) to use this server. Most MCP clients store the configuration as JSON.
+
+#### Option 1: Using npx (Recommended - No local build required)
+
+```json
+{
+  "mcpServers": {
+    "polardb-supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "polardb-supabase-mcp",
+        "--api-url",
+        "http://your-polardb-supabase-host:port",
+        "--service-role-key",
+        "your-service-role-key",
+        "--anon-key",
+        "your-anon-key",
+        "--dashboard-username",
+        "your-dashboard-username",
+        "--dashboard-password",
+        "your-dashboard-password",
+        "--project-ref",
+        "default"
+      ]
+    }
+  }
+}
+```
+
+#### Option 2: Using local build
 
 ```json
 {
@@ -68,7 +98,7 @@ To restrict the server to read-only queries, set the `--read-only` flag:
 node /path/to/supabase-mcp/packages/mcp-server-supabase/dist/transports/stdio.js --read-only
 ```
 
-We recommend you enable this by default. This prevents write operations on your databases.
+We recommend you enable this by default. This prevents write operations on your databases, including creating or deleting Edge Function secrets.
 
 ## Tools
 
@@ -86,6 +116,13 @@ The following tools are available to the LLM:
 - `list_edge_functions`: Lists all Edge Functions in a project
 - `get_edge_function`: Gets details for a specific Edge Function
 - `deploy_edge_function`: Deploys a new Edge Function to a project
+
+### Edge Functions Secrets
+- `list_edge_function_secrets`: Lists all Edge Function secrets (encrypted values)
+- `create_edge_function_secrets`: Creates or updates Edge Function secrets (supports batch operations, values are encrypted)
+- `delete_edge_function_secrets`: Deletes Edge Function secrets (supports batch deletion)
+
+**Note**: Secrets management requires Dashboard authentication (username/password). Secrets are automatically encrypted when stored.
 
 ### AI Prompts
 - `get_best_practices`: List all available Supabase AI prompts and development guidance

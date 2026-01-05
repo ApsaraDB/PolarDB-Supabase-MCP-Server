@@ -1,7 +1,7 @@
 {
   "name": "polardb-supabase-mcp",
   "private": false,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "bin": {
     "polardb-supabase-mcp": "./packages/mcp-server-supabase/dist/transports/stdio.js"
   },

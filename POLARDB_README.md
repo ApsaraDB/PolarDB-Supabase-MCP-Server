@@ -80,20 +80,47 @@ pnpm build
 
 创建或编辑 Cursor 的 MCP 配置文件：
 
+##### 方式一：使用 npx（推荐 - 无需本地编译）
+
 ```json
 {
-  "polardb-supabase": {
-    "command": "node",
-    "args": [
-      "/path/to/supabase-mcp/packages/mcp-server-supabase/dist/transports/stdio.js",
-      "--api-url", "https://your-polardb-supabase-ip:port",
-      "--service-role-key", "your-service-role-key",
-      "--anon-key", "your-anon-key",
-      "--project-ref", "your-project-id",
-      "--dashboard-username", "your-dashboard-username",
-      "--dashboard-password", "your-dashboard-password",
-      "--read-only"
-    ]
+  "mcpServers": {
+    "polardb-supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "polardb-supabase-mcp",
+        "--api-url", "https://your-polardb-supabase-ip:port",
+        "--service-role-key", "your-service-role-key",
+        "--anon-key", "your-anon-key",
+        "--project-ref", "your-project-id",
+        "--dashboard-username", "your-dashboard-username",
+        "--dashboard-password", "your-dashboard-password",
+        "--read-only"
+      ]
+    }
+  }
+}
+```
+
+##### 方式二：使用本地编译
+
+```json
+{
+  "mcpServers": {
+    "polardb-supabase": {
+      "command": "node",
+      "args": [
+        "/path/to/supabase-mcp/packages/mcp-server-supabase/dist/transports/stdio.js",
+        "--api-url", "https://your-polardb-supabase-ip:port",
+        "--service-role-key", "your-service-role-key",
+        "--anon-key", "your-anon-key",
+        "--project-ref", "your-project-id",
+        "--dashboard-username", "your-dashboard-username",
+        "--dashboard-password", "your-dashboard-password",
+        "--read-only"
+      ]
+    }
   }
 }
 ```
