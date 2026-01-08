@@ -20,15 +20,19 @@ PolarDB Supabase MCP，提供完整的数据库管理、Edge Functions 和存储
 #### 存储管理
 - `list_storage_buckets` - 列出所有存储桶
 
-#### Edge Functions 管理（需要 Dashboard 认证）
+#### Edge Functions 管理
 - `list_edge_functions` - 列出所有 Edge Functions
 - `get_edge_function` - 获取特定 Edge Function 详情
 - `deploy_edge_function` - 部署 Edge Function
 
-#### Edge Functions Secrets 管理（需要 Dashboard 认证）
+#### Edge Functions Secrets 管理
 - `list_edge_function_secrets` - 列出所有 Edge Function secrets（加密值）
 - `create_edge_function_secrets` - 创建或更新 Edge Function secrets（支持批量操作，值会被加密存储）
 - `delete_edge_function_secrets` - 删除 Edge Function secrets（支持批量删除）
+
+**认证方式**: Edge Functions 和 Secrets 管理支持两种认证方式：
+1. **Dashboard 认证**（优先）：使用 Dashboard 用户名和密码（Basic Auth）
+2. **Service Role Key 认证**（备选）：如果未配置 Dashboard 认证，将使用 Service Role Key（Bearer Auth）
 
 ### 🎯 Supabase 官方 AI Prompts 集成
 
@@ -65,7 +69,6 @@ npm install -g pnpm  # 推荐使用 pnpm
 ```bash
 # 克隆项目
 git clone <repository-url>
-cd supabase-mcp
 
 # 安装依赖
 pnpm install
@@ -132,10 +135,10 @@ pnpm build
 | 参数 | 环境变量 | 说明 | 必需 |
 |------|----------|------|------|
 | `--api-url` | `SUPABASE_API_URL` | Supabase 项目 API URL | ✅ |
-| `--service-role-key` | `SUPABASE_SERVICE_ROLE_KEY` | Supabase 服务角色密钥 | ✅ |
+| `--service-role-key` | `SUPABASE_SERVICE_ROLE_KEY` | Supabase 服务角色密钥（数据库操作必需，也可用于 Edge Functions 认证） | ✅ |
 | `--anon-key` | `SUPABASE_ANON_KEY` | Supabase 匿名密钥 | ❌ |
-| `--dashboard-username` | `SUPABASE_DASHBOARD_USERNAME` | Supabase Dashboard 用户名（用于 Edge Functions 和 Secrets 管理） | ❌ |
-| `--dashboard-password` | `SUPABASE_DASHBOARD_PASSWORD` | Supabase Dashboard 密码（用于 Edge Functions 和 Secrets 管理） | ❌ |
+| `--dashboard-username` | `SUPABASE_DASHBOARD_USERNAME` | Supabase Dashboard 用户名（Edge Functions 优先认证方式） | ❌ |
+| `--dashboard-password` | `SUPABASE_DASHBOARD_PASSWORD` | Supabase Dashboard 密码（Edge Functions 优先认证方式） | ❌ |
 | `--read-only` | - | 只读模式，防止写操作 | ❌ |
 
 

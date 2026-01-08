@@ -98,20 +98,9 @@ export class PolarDBPlatform implements SupabasePlatform {
   // 类型生成
   async generateTypescriptTypes(projectId: string): Promise<GenerateTypescriptTypesResult> {
     try {
-      // 检查是否有 Dashboard 认证信息
-      if (!this.dashboardUsername || !this.dashboardPassword) {
-        throw new Error('需要先设置用户名和密码');
-      }
-      
-      // 使用 Basic 认证调用 Supabase Studio 接口
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
-      
       const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/types/typescript`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Basic ${basicAuth}`,
-          'Content-Type': 'application/json'
-        }
+        headers: this.getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -178,22 +167,31 @@ export class PolarDBPlatform implements SupabasePlatform {
     }
   }
 
-  // Edge Functions 相关
-  async listEdgeFunctions(projectId: string): Promise<EdgeFunction[]> { 
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error('Edge Functions 相关功能需要先设置用户名和密码');
-    }
-    
-    try {
-      // 使用 Basic 认证，这是 Supabase Studio 使用的认证方式
+  // 获取认证头 - 优先使用 Basic 认证，否则使用 Bearer 认证
+  private getAuthHeaders(): Record<string, string> {
+    if (this.dashboardUsername && this.dashboardPassword) {
+      // 优先使用 Basic 认证（Dashboard 用户名密码）
       const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
-      
+      return {
+        'Authorization': `Basic ${basicAuth}`,
+        'Content-Type': 'application/json'
+      };
+    } else {
+      // 使用 Bearer 认证（Service Role Key）
+      return {
+        'Authorization': `Bearer ${this.serviceKey}`,
+        'apikey': this.serviceKey,
+        'Content-Type': 'application/json'
+      };
+    }
+  }
+
+  // Edge Functions 相关
+  async listEdgeFunctions(projectId: string): Promise<EdgeFunction[]> {
+    try {
       const response = await fetch(`${this.apiUrl}/api/v1/projects/default/functions`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Basic ${basicAuth}`,
-          'Content-Type': 'application/json'
-        }
+        headers: this.getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -226,20 +224,10 @@ export class PolarDBPlatform implements SupabasePlatform {
   }
   
   async getEdgeFunction(projectId: string, functionSlug: string): Promise<EdgeFunction> { 
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error('Edge Functions 相关功能需要先设置用户名和密码');
-    }
-    
     try {
-      // 使用 Basic 认证，这是 Supabase Studio 使用的认证方式
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
-      
       const response = await fetch(`${this.apiUrl}/api/v1/projects/default/functions/${functionSlug}`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Basic ${basicAuth}`,
-          'Content-Type': 'application/json'
-        }
+        headers: this.getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -269,10 +257,6 @@ export class PolarDBPlatform implements SupabasePlatform {
     }
   
   async deployEdgeFunction(projectId: string, options: DeployEdgeFunctionOptions): Promise<Omit<EdgeFunction, 'files'>> { 
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error('Edge Functions 相关功能需要先设置用户名和密码');
-    }
-    
     try {
       const { name, entrypoint_path, import_map_path, files } = options;
       
@@ -292,14 +276,13 @@ export class PolarDBPlatform implements SupabasePlatform {
         formData.append('file', new Blob([file.content], { type: 'application/typescript' }), file.name);
       });
       
-      // 使用 Basic 认证，这是 Supabase Studio 使用的认证方式
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
+      // 获取认证头，但需要去掉 Content-Type（FormData 会自动设置）
+      const authHeaders = this.getAuthHeaders();
+      const { 'Content-Type': _, ...headersWithoutContentType } = authHeaders;
       
       const response = await fetch(`${this.apiUrl}/api/v1/projects/default/functions/deploy?slug=${name}`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Basic ${basicAuth}`
-        },
+        headers: headersWithoutContentType,
         body: formData
       });
       
@@ -330,19 +313,10 @@ export class PolarDBPlatform implements SupabasePlatform {
 
   // Edge function secrets
   async listSecrets(projectId: string): Promise<Secret[]> {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error('Edge Functions secrets 相关功能需要先设置用户名和密码');
-    }
-    
     try {
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
-      
       const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Basic ${basicAuth}`,
-          'Content-Type': 'application/json'
-        }
+        headers: this.getAuthHeaders()
       });
       
       if (!response.ok) {
@@ -364,19 +338,10 @@ export class PolarDBPlatform implements SupabasePlatform {
   }
 
   async createSecrets(projectId: string, secrets: CreateSecretsOptions): Promise<Secret[]> {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error('Edge Functions secrets 相关功能需要先设置用户名和密码');
-    }
-    
     try {
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
-      
       const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Basic ${basicAuth}`,
-          'Content-Type': 'application/json'
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(secrets)
       });
       
@@ -399,19 +364,10 @@ export class PolarDBPlatform implements SupabasePlatform {
   }
 
   async deleteSecrets(projectId: string, secretNames: string[]): Promise<void> {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error('Edge Functions secrets 相关功能需要先设置用户名和密码');
-    }
-    
     try {
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString('base64');
-      
       const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Basic ${basicAuth}`,
-          'Content-Type': 'application/json'
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(secretNames)
       });
       

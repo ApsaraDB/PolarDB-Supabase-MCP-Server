@@ -21,8 +21,8 @@ If you don't have Node.js installed, you can download it from [nodejs.org](https
 You'll need the following from your PolarDB instance:
 
 - **API URL**: Your PolarDB instance endpoint (e.g., `http://your-host:port`)
-- **Service Role Key**: For database operations
-- **Dashboard Username/Password**: For Edge Functions, secrets management, and type generation
+- **Service Role Key**: For database operations and as fallback authentication for Edge Functions/secrets
+- **Dashboard Username/Password** (Optional): For Edge Functions, secrets management, and type generation (if not provided, Service Role Key will be used)
 
 ### 2. Configure your MCP client
 
@@ -122,7 +122,7 @@ The following tools are available to the LLM:
 - `create_edge_function_secrets`: Creates or updates Edge Function secrets (supports batch operations, values are encrypted)
 - `delete_edge_function_secrets`: Deletes Edge Function secrets (supports batch deletion)
 
-**Note**: Secrets management requires Dashboard authentication (username/password). Secrets are automatically encrypted when stored.
+**Note**: Secrets management supports two authentication methods: Dashboard authentication (username/password) is preferred, but Service Role Key can also be used. Secrets are automatically encrypted when stored.
 
 ### AI Prompts
 - `get_best_practices`: List all available Supabase AI prompts and development guidance

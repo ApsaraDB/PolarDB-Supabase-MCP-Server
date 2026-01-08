@@ -8559,16 +8559,9 @@ var PolarDBPlatform = class {
   // 类型生成
   async generateTypescriptTypes(projectId) {
     try {
-      if (!this.dashboardUsername || !this.dashboardPassword) {
-        throw new Error("\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
-      }
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
       const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/types/typescript`, {
         method: "GET",
-        headers: {
-          "Authorization": `Basic ${basicAuth}`,
-          "Content-Type": "application/json"
-        }
+        headers: this.getAuthHeaders()
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -8615,19 +8608,28 @@ var PolarDBPlatform = class {
       return [];
     }
   }
+  // 获取认证头 - 优先使用 Basic 认证，否则使用 Bearer 认证
+  getAuthHeaders() {
+    if (this.dashboardUsername && this.dashboardPassword) {
+      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
+      return {
+        "Authorization": `Basic ${basicAuth}`,
+        "Content-Type": "application/json"
+      };
+    } else {
+      return {
+        "Authorization": `Bearer ${this.serviceKey}`,
+        "apikey": this.serviceKey,
+        "Content-Type": "application/json"
+      };
+    }
+  }
   // Edge Functions 相关
   async listEdgeFunctions(projectId) {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error("Edge Functions \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
-    }
     try {
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
       const response = await fetch(`${this.apiUrl}/api/v1/projects/default/functions`, {
         method: "GET",
-        headers: {
-          "Authorization": `Basic ${basicAuth}`,
-          "Content-Type": "application/json"
-        }
+        headers: this.getAuthHeaders()
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -8654,17 +8656,10 @@ var PolarDBPlatform = class {
     }
   }
   async getEdgeFunction(projectId, functionSlug) {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error("Edge Functions \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
-    }
     try {
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
       const response = await fetch(`${this.apiUrl}/api/v1/projects/default/functions/${functionSlug}`, {
         method: "GET",
-        headers: {
-          "Authorization": `Basic ${basicAuth}`,
-          "Content-Type": "application/json"
-        }
+        headers: this.getAuthHeaders()
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -8690,9 +8685,6 @@ var PolarDBPlatform = class {
     }
   }
   async deployEdgeFunction(projectId, options) {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error("Edge Functions \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
-    }
     try {
       const { name, entrypoint_path, import_map_path, files } = options;
       const formData = new FormData();
@@ -8705,12 +8697,11 @@ var PolarDBPlatform = class {
       files.forEach((file) => {
         formData.append("file", new Blob([file.content], { type: "application/typescript" }), file.name);
       });
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
+      const authHeaders = this.getAuthHeaders();
+      const { "Content-Type": _, ...headersWithoutContentType } = authHeaders;
       const response = await fetch(`${this.apiUrl}/api/v1/projects/default/functions/deploy?slug=${name}`, {
         method: "POST",
-        headers: {
-          "Authorization": `Basic ${basicAuth}`
-        },
+        headers: headersWithoutContentType,
         body: formData
       });
       if (!response.ok) {
@@ -8737,17 +8728,10 @@ var PolarDBPlatform = class {
   }
   // Edge function secrets
   async listSecrets(projectId) {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
-    }
     try {
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
       const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
         method: "GET",
-        headers: {
-          "Authorization": `Basic ${basicAuth}`,
-          "Content-Type": "application/json"
-        }
+        headers: this.getAuthHeaders()
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -8764,17 +8748,10 @@ var PolarDBPlatform = class {
     }
   }
   async createSecrets(projectId, secrets) {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
-    }
     try {
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
       const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
         method: "POST",
-        headers: {
-          "Authorization": `Basic ${basicAuth}`,
-          "Content-Type": "application/json"
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(secrets)
       });
       if (!response.ok) {
@@ -8792,17 +8769,10 @@ var PolarDBPlatform = class {
     }
   }
   async deleteSecrets(projectId, secretNames) {
-    if (!this.dashboardUsername || !this.dashboardPassword) {
-      throw new Error("Edge Functions secrets \u76F8\u5173\u529F\u80FD\u9700\u8981\u5148\u8BBE\u7F6E\u7528\u6237\u540D\u548C\u5BC6\u7801");
-    }
     try {
-      const basicAuth = Buffer.from(`${this.dashboardUsername}:${this.dashboardPassword}`).toString("base64");
       const response = await fetch(`${this.apiUrl}/api/v1/projects/${projectId}/secrets`, {
         method: "DELETE",
-        headers: {
-          "Authorization": `Basic ${basicAuth}`,
-          "Content-Type": "application/json"
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(secretNames)
       });
       if (!response.ok) {

@@ -24,6 +24,7 @@ declare class PolarDBPlatform implements SupabasePlatform {
     getAnonKey(projectId: string): Promise<string>;
     generateTypescriptTypes(projectId: string): Promise<GenerateTypescriptTypesResult>;
     listAllBuckets(projectId: string): Promise<StorageBucket[]>;
+    private getAuthHeaders;
     listEdgeFunctions(projectId: string): Promise<EdgeFunction[]>;
     getEdgeFunction(projectId: string, functionSlug: string): Promise<EdgeFunction>;
     deployEdgeFunction(projectId: string, options: DeployEdgeFunctionOptions): Promise<Omit<EdgeFunction, 'files'>>;
