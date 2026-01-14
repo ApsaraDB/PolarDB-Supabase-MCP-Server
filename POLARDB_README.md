@@ -93,7 +93,7 @@ pnpm build
       "args": [
         "-y",
         "polardb-supabase-mcp",
-        "--api-url", "https://your-polardb-supabase-ip:port",
+        "--api-url", "http://your-polardb-supabase-ip:port",
         "--service-role-key", "your-service-role-key",
         "--anon-key", "your-anon-key",
         "--project-ref", "your-project-id",
@@ -115,7 +115,7 @@ pnpm build
       "command": "node",
       "args": [
         "/path/to/supabase-mcp/packages/mcp-server-supabase/dist/transports/stdio.js",
-        "--api-url", "https://your-polardb-supabase-ip:port",
+        "--api-url", "http://your-polardb-supabase-ip:port",
         "--service-role-key", "your-service-role-key",
         "--anon-key", "your-anon-key",
         "--project-ref", "your-project-id",
